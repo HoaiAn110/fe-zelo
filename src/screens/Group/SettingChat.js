@@ -39,7 +39,7 @@ const SettingChat = ({ route }) => {
             }
         }
         getMembers();
-    }, []);
+    }, [groupId]);
 
     const handleShowMember = () => {
         navigation.navigate('ListMember', {
@@ -54,28 +54,44 @@ const SettingChat = ({ route }) => {
 
     const handleAddMember = () => {
         navigation.navigate("AddMembers", {
-          _id: groupId,
-          name: groupName,
-          avatar: groupImg,
-          groupMembers,
-          leader,
-          coLeader,
+            _id: groupId,
+            name: groupName,
+            avatar: groupImg,
+            groupMembers,
+            leader,
+            coLeader,
         });
     }
     const getLeader = members.find((member) => member.role === 'leader');
+    const leaderId = getLeader?._id;
     const handleLeaveGroup = async () => {
-        try {
-            if (userId === getLeader) {
-                alert('Không thể rời nhóm khi bạn là chủ nhóm, vui lòng chuyển quyền chủ nhóm cho thành viên khác trước khi rời nhóm');
-                return;
-            }
-            await groupApi.handleGroups(`/leaveGroup/${groupId}/${userId}`, {}, 'DELETE');
-        } catch (error) {
-            console.log('Failed to leave group: ', error);
-        }
-    }
+        if (isLeader === true) {
+            Alert.alert('Bạn không thể rời nhóm khi bạn là người tạo nhóm');
+        } else {
+            Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn rời nhóm?', [
+                {
+                    text: 'Hủy',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Xác nhận',
+                    onPress: async () => {
+                        try {
+                            await groupApi.handleGroups(`/leaveGroup/${groupId}/${userId}`, {}, 'DELETE');
 
-    const isLeader = members.some((member) => member._id === userId && member.role === 'leader');
+                            navigation.navigate('Tin nhắn');
+                        } catch (error) {
+                            console.log('Failed to leave group: ', error);
+                        }
+                    },
+                },
+            ],
+                { cancelable: false }
+            );
+        }
+    };
+
+    const isLeader = leaderId === userId;
     const handleDishbandGroup = async () => {
         Alert.alert(
             'Xác nhận',
@@ -91,8 +107,8 @@ const SettingChat = ({ route }) => {
                         try {
                             await groupApi.handleGroups(`/deleteGroup/${groupId}`, {}, 'DELETE');
                             socket.emit("groupDeleted", {
-                              groupId,
-                              members: members.map((member) => member._id),
+                                groupId,
+                                members: members.map((member) => member._id),
                             });
                             navigation.navigate('Tin nhắn');
                         } catch (error) {

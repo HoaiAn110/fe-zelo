@@ -1,20 +1,15 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import TextComponent from "../../components/TextComponent";
 import { COLORS, APPINFOS } from "../../constants";
 import { globalStyles } from "../../styles/globalStyle";
-import ButtonComponent from "../../components/ButtonComponent";
-import HeaderComponent from "../../components/HeaderComponet";
-import { groupApi } from "../../apis/groupApi";
-import userApi from "../../apis/userApi";
 import { FlatList } from 'react-native-gesture-handler';
 import { Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../redux/reducers/authReducer';
 import groupAvatar from "../../assets/images/group.png";
-
-
+import { groupApi } from "../../apis/groupApi";
 
 const ListGroupScreen = () => {
     const navigation = useNavigation();
@@ -22,8 +17,6 @@ const ListGroupScreen = () => {
     const userId = user.id;
 
     const [friendsAndGroups, setFriendsAndGroups] = useState([]);
-
-
 
     useEffect(() => {
         const fetchGroups = async () => {
@@ -33,21 +26,17 @@ const ListGroupScreen = () => {
                     {},
                     "GET"
                 );
-
-                setFriendsAndGroups(groupsResponse.data.map((group) => ({
-                    ...group,
-                    type: "group"
-                })));
+                setFriendsAndGroups(groupsResponse);
             } catch (error) {
                 console.error(error);
             }
         };
         fetchGroups();
-    }, []
-    )
+    }, [userId]);
 
     return (
-        <View style={styles.container} >
+        <View style={styles.container}>
+            {/* Uncomment and update HeaderComponent if needed */}
             {/* <HeaderComponent
                 style={{
                     flexDirection: "row",
@@ -56,7 +45,6 @@ const ListGroupScreen = () => {
                     alignItems: "center",
                     paddingLeft: 16,
                     justifyContent: "space-between",
-
                 }}
                 title="Danh sách nhóm"
                 fontFamily={"medium"}
@@ -69,18 +57,18 @@ const ListGroupScreen = () => {
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         onPress={() => {
-                            if (item.type === "group") {
-                                navigation.navigate("GroupDetailScreen", { groupId: item.id });
-                            } else {
-                                navigation.navigate("ChatScreen", { userId: item.id });
-                            }
+                            navigation.navigate("GroupScreen", {
+                                groupId: item.id,
+                                groupName: item.name,
+                                groupAvatar: item.avatar,
+                            });
                         }}
                     >
                         <View style={globalStyles.listItemContainer}>
                             <View style={styles.listItem}>
                                 <Avatar.Image
                                     size={40}
-                                    source={item.type === "group" ? groupAvatar : { uri: item.Image }}
+                                    source={item.avatar ? { uri: item.avatar } : groupAvatar}
                                 />
                                 <View style={styles.listItemContent}>
                                     <TextComponent
@@ -89,24 +77,21 @@ const ListGroupScreen = () => {
                                         color={COLORS.black}
                                         size={16}
                                         text={item.name}
-                                    >
-                                    </TextComponent>
-
+                                    />
                                 </View>
                             </View>
                         </View>
                     </TouchableOpacity>
                 )}
             />
-
-
         </View>
-    )
-}
+    );
+};
+
 const styles = StyleSheet.create({
-    inputsContainer: {
-        justifyContent: "center",
-        alignItems: "center",
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.white,
     },
     listItem: {
         flexDirection: "row",
@@ -117,8 +102,10 @@ const styles = StyleSheet.create({
     listItemContent: {
         marginLeft: 10,
     },
-
-
+    listItemTitle: {
+        fontSize: 16,
+        color: COLORS.black,
+    },
 });
 
 export default ListGroupScreen;

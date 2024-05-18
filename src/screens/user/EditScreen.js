@@ -14,10 +14,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 // import axios from 'axios';
 import authApi from '../../apis/authApi';
+import * as ImagePicker from 'expo-image-picker';
 
 const EditScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const user = useSelector(authSelector);
+    const userId = user.id;
     const [errorMessage, setErrorMessage] = useState("");
 
     const [values, setValues] = useState({
@@ -44,6 +46,7 @@ const EditScreen = ({ navigation }) => {
             dateOfBirth: selectedDate,
             gender: gender,
             email: email,
+            photoUrl: image,
         };
 
         try {
@@ -60,6 +63,37 @@ const EditScreen = ({ navigation }) => {
     const formattedDate = moment(values.selectedDate, 'YYYY/MM/DD').toDate();
     const formatDate = getFormatedDate(formattedDate, 'DD-MM-YYYY');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+
+    const [image, setImage] = useState(null);
+    const pickImage = async (userId) => {
+        try {
+            let result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            });
+
+            if (!result.canceled) {
+                const formData = new FormData();
+                formData.append("file", {
+                    uri: result.assets[0].uri,
+                    type: "image/jpeg",
+                    name: "test.jpg",
+                });
+
+                const response = await fetch(`${APPINFOS.BASE_URL}/users/upload/${userId}`, {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+                const fileUrl = data.fileUrl;
+                setImage(fileUrl);
+                console.log('fileUrl', fileUrl)
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
 
     return (
@@ -80,8 +114,19 @@ const EditScreen = ({ navigation }) => {
                 size={18}
             />
 
-            <TouchableOpacity style={styles.avatar}>
-                <Avatar.Image size={100} source={user.photoUrl ? { uri: user.photoUrl } : require('../../assets/images/user.png')} />
+            <TouchableOpacity style={styles.avatar} onPress={pickImage}>
+                {image ? (
+                    <Avatar.Image size={100} source={{ uri: image }} />
+                ) : (
+                    <Avatar.Image
+                        size={100}
+                        source={
+                            user.photoUrl
+                                ? { uri: user.photoUrl }
+                                : require('../../assets/images/user.png')
+                        }
+                    />
+                )}
             </TouchableOpacity>
 
             <View style={styles.showInput}>

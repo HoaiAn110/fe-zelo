@@ -42,6 +42,11 @@ const ContactScreen = () => {
     fetchData();
   }, []);
 
+  const navigation = useNavigation();
+  const handlePressContact = (item) => {
+    navigation.navigate("DetailsScreen", { contact: item });
+  };
+
 
 
   const renderContactItem = ({ item }) => (

@@ -35,6 +35,7 @@ const MessageScreen = ({ navigation, route }) => {
   const [uploadedFileUrl, setUploadedFileUrl] = useState("");
   const user = useSelector(authSelector);
   const userId = user.id;
+  const userPhotp = user.photoUrl;
   const friendId = route.params.friendId;
   const userImg = route.params.friendImg;
   const roomId = [userId, friendId].sort().join("-");
@@ -46,15 +47,15 @@ const MessageScreen = ({ navigation, route }) => {
       );
       const data = await response.json();
       const visibleMessages = data.filter(
-        (msg) =>  !(msg.isHidden &&msg.fromSelf) 
+        (msg) => !(msg.isHidden && msg.fromSelf)
       );
-       const fetchedMessages = visibleMessages.map((msg) => ({
+      const fetchedMessages = visibleMessages.map((msg) => ({
         _id: msg.id,
         text: msg.message,
         createdAt: new Date(msg.createdAt),
         user: {
           _id: msg.fromSelf ? userId : friendId,
-          avatar: msg.fromSelf ? userImg : route.params.friendImg,
+          avatar: msg.fromSelf ? userPhotp : userImg,
         },
         isHidden: msg.isHidden,
         fromSelf: msg.fromSelf,
@@ -173,8 +174,8 @@ const MessageScreen = ({ navigation, route }) => {
         return;
       }
 
-      const messageId = selectedMessage._id; 
-      const senderId =  selectedMessage.user._id;
+      const messageId = selectedMessage._id;
+      const senderId = selectedMessage.user._id;
       console.log("Sender ID:", senderId);
 
       const response = await axios.patch(
@@ -296,17 +297,17 @@ const MessageScreen = ({ navigation, route }) => {
         renderMessageText={
           isImageMessage
             ? () => (
-                <View>
-                  <Image
-                    source={{ uri: props.currentMessage.text }}
-                    style={{
-                      width: 200,
-                      height: 200,
-                      resizeMode: "cover",
-                      alignSelf: "center",
-                    }}
-                  />
-                  {/* <TouchableOpacity
+              <View>
+                <Image
+                  source={{ uri: props.currentMessage.text }}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    resizeMode: "cover",
+                    alignSelf: "center",
+                  }}
+                />
+                {/* <TouchableOpacity
                     style={{
                       width: 200,
                       height: 50,
@@ -319,35 +320,67 @@ const MessageScreen = ({ navigation, route }) => {
                       {props.currentMessage.text}
                     </Text>
                   </TouchableOpacity> */}
-                </View>
-              )
+              </View>
+            )
             : isVideoMessage
               ? () => (
+                <View>
+                  <Video
+                    source={{ uri: props.currentMessage.text }}
+                    rate={1.0}
+                    volume={1.0}
+                    isMuted={false}
+                    resizeMode="cover"
+                    shouldPlay={false}
+                    isLooping
+                    useNativeControls
+                    style={{
+                      width: 300,
+                      height: 200,
+                      alignSelf: "center",
+                      margin: 10,
+                    }}
+                  />
+                  <TouchableOpacity
+                    style={{
+                      width: 300,
+                      height: 50,
+                      alignSelf: "center",
+                      margin: 10,
+                    }}
+                    onPress={() => Linking.openURL(props.currentMessage.text)}
+                  >
+                    <Text style={{ color: "black" }}>
+                      {props.currentMessage.text}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )
+              : isFileMessage
+                ? () => (
                   <View>
-                    <Video
-                      source={{ uri: props.currentMessage.text }}
-                      rate={1.0}
-                      volume={1.0}
-                      isMuted={false}
-                      resizeMode="cover"
-                      shouldPlay={false}
-                      isLooping
-                      useNativeControls
+                    <Image
+                      source={
+                        fileIcons[props.currentMessage.text.split(".").pop()]
+                      }
                       style={{
-                        width: 300,
-                        height: 200,
+                        width: 100,
+                        height: 80,
+                        resizeMode: "cover",
                         alignSelf: "center",
                         margin: 10,
                       }}
                     />
                     <TouchableOpacity
                       style={{
-                        width: 300,
+                        width: 100,
                         height: 50,
                         alignSelf: "center",
                         margin: 10,
                       }}
-                      onPress={() => Linking.openURL(props.currentMessage.text)}
+                      onPress={() =>
+                        Linking.openURL(props.currentMessage.text)
+                      }
                     >
                       <Text style={{ color: "black" }}>
                         {props.currentMessage.text}
@@ -355,38 +388,6 @@ const MessageScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   </View>
                 )
-              : isFileMessage
-                ? () => (
-                    <View>
-                      <Image
-                        source={
-                          fileIcons[props.currentMessage.text.split(".").pop()]
-                        }
-                        style={{
-                          width: 100,
-                          height: 80,
-                          resizeMode: "cover",
-                          alignSelf: "center",
-                          margin: 10,
-                        }}
-                      />
-                      <TouchableOpacity
-                        style={{
-                          width: 100,
-                          height: 50,
-                          alignSelf: "center",
-                          margin: 10,
-                        }}
-                        onPress={() =>
-                          Linking.openURL(props.currentMessage.text)
-                        }
-                      >
-                        <Text style={{ color: "black" }}>
-                          {props.currentMessage.text}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )
                 : null
         }
       />

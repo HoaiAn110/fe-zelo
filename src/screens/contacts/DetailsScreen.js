@@ -13,22 +13,11 @@ const DetailsScreen = () => {
     const route = useRoute();
     const { contact } = route.params;
 
-    const handleRemove = () => {
-        console.log('Remove contact:', contact);
-        navigation.goBack();
-    }
 
     return (
         <View style={globalStyles.container}>
             <HeaderComponent
-                style={{
-                    flexDirection: "row",
-                    backgroundColor: COLORS.primary,
-                    height: APPINFOS.sizes.HEIGHT * 0.06,
-                    alignItems: "center",
-                    paddingLeft: 16,
-                    justifyContent: "space-between",
-                }}
+                style={styles.header}
                 title="Chi tiết liên hệ"
                 fontFamily={"medium"}
                 onBackPress={() => navigation.goBack()}
@@ -36,67 +25,74 @@ const DetailsScreen = () => {
                 size={18}
             />
             <View style={styles.detailsContainer}>
-                <Avatar.Image size={100} source={{ uri: contact.image }} style={styles.contactImage} />
-                <Text style={styles.name}>{contact.name}</Text>
-                <Text style={styles.phoneNumber}>{contact.phoneNumber}</Text>
-                <Text style={styles.phoneNumber}>{contact.email}</Text>
-                <ButtonComponent
-                    title="Sửa"
-                    style={{
-                        backgroundColor: COLORS.primary,
-                        width: APPINFOS.sizes.WIDTH * 0.4,
-                        height: APPINFOS.sizes.HEIGHT * 0.06,
-                        borderRadius: 5,
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                    onPress={() => navigation.navigate('EditContactScreen', { contact })}
-                />
-            </View>
-
-
-            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
-
-                <ButtonComponent
-                    title="Xóa"
-                    style={{
-                        backgroundColor: COLORS.red,
-                        width: APPINFOS.sizes.WIDTH * 0.4,
-                        height: APPINFOS.sizes.HEIGHT * 0.06,
-                        borderRadius: 5,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginRight: 10,
-                    }}
-                    onPress={handleRemove}
-                />
-
+                <Avatar.Image size={100} source={{ uri: contact.photoUrl }} style={styles.contactImage} />
+                <View style={styles.buttonContainer}>
+                    <Text style={styles.name}>Tên: {contact.fullname}</Text>
+                </View>
+                <Text style={styles.info}>Giới tính: {contact.gender}</Text>
+                <Text style={styles.info}>Ngày sinh: {contact.dateOfBirth}</Text>
+                <Text style={styles.info}>Email: {contact.email}</Text>
 
             </View>
+
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    header: {
+        flexDirection: "row",
+        backgroundColor: COLORS.primary,
+        height: APPINFOS.sizes.HEIGHT * 0.06,
+        alignItems: "center",
+        paddingLeft: 16,
+    },
     detailsContainer: {
         flex: 1,
-        alignItems: 'center',
+        marginLeft: 20,
         marginTop: 20,
     },
     contactImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
         marginBottom: 20,
+        alignSelf: 'center',
     },
     name: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 10,
+        color: COLORS.black,
+
     },
-    phoneNumber: {
+    info: {
         fontSize: 18,
         color: 'gray',
+        marginBottom: 5,
+    },
+    editButton: {
+        backgroundColor: COLORS.primary,
+        width: APPINFOS.sizes.WIDTH * 0.4,
+        height: APPINFOS.sizes.HEIGHT * 0.06,
+        borderRadius: 5,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 20,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    deleteButton: {
+        backgroundColor: COLORS.red,
+        width: APPINFOS.sizes.WIDTH * 0.4,
+        height: APPINFOS.sizes.HEIGHT * 0.06,
+        borderRadius: 5,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    buttonText: {
+        color: COLORS.white,
+        fontSize: 18,
     },
 });
 

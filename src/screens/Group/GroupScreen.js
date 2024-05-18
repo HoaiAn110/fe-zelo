@@ -122,7 +122,7 @@ const GroupScreen = ({ navigation, route }) => {
       const message = newMessages[0];
       message.user._id = userId;
       message.roomId = roomId;
-      message.user.name = user.name;
+      message.user.name = user.fullname;
 
       socket.emit("sendMessageGroup", message);
 
@@ -327,24 +327,60 @@ const GroupScreen = ({ navigation, route }) => {
           renderMessageText={
             isImageMessage
               ? () => (
+                <View>
+                  <Image
+                    source={{ uri: props.currentMessage.text }}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      resizeMode: "cover",
+                      alignSelf: "center",
+                    }}
+                  />
+                  <TouchableOpacity
+                    style={{
+                      width: 200,
+                      height: 50,
+                      alignSelf: "center",
+                      margin: 10,
+                    }}
+                    onPress={() => Linking.openURL(props.currentMessage.text)}
+                  >
+                    <Text style={{ color: "black" }}>
+                      {props.currentMessage.text}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )
+              : isVideoMessage
+                ? () => (
                   <View>
-                    <Image
+                    <Video
                       source={{ uri: props.currentMessage.text }}
+                      rate={1.0}
+                      volume={1.0}
+                      isMuted={false}
+                      resizeMode="cover"
+                      shouldPlay={false}
+                      isLooping
+                      useNativeControls
                       style={{
-                        width: 200,
+                        width: 300,
                         height: 200,
-                        resizeMode: "cover",
                         alignSelf: "center",
+                        margin: 10,
                       }}
                     />
                     <TouchableOpacity
                       style={{
-                        width: 200,
+                        width: 300,
                         height: 50,
                         alignSelf: "center",
                         margin: 10,
                       }}
-                      onPress={() => Linking.openURL(props.currentMessage.text)}
+                      onPress={() =>
+                        Linking.openURL(props.currentMessage.text)
+                      }
                     >
                       <Text style={{ color: "black" }}>
                         {props.currentMessage.text}
@@ -352,28 +388,26 @@ const GroupScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   </View>
                 )
-              : isVideoMessage
-                ? () => (
+                : isFileMessage
+                  ? () => (
                     <View>
-                      <Video
-                        source={{ uri: props.currentMessage.text }}
-                        rate={1.0}
-                        volume={1.0}
-                        isMuted={false}
-                        resizeMode="cover"
-                        shouldPlay={false}
-                        isLooping
-                        useNativeControls
+                      <Image
+                        source={
+                          fileIcons[
+                          props.currentMessage.text.split(".").pop()
+                          ]
+                        }
                         style={{
-                          width: 300,
-                          height: 200,
+                          width: 100,
+                          height: 80,
+                          resizeMode: "cover",
                           alignSelf: "center",
                           margin: 10,
                         }}
                       />
                       <TouchableOpacity
                         style={{
-                          width: 300,
+                          width: 100,
                           height: 50,
                           alignSelf: "center",
                           margin: 10,
@@ -388,40 +422,6 @@ const GroupScreen = ({ navigation, route }) => {
                       </TouchableOpacity>
                     </View>
                   )
-                : isFileMessage
-                  ? () => (
-                      <View>
-                        <Image
-                          source={
-                            fileIcons[
-                              props.currentMessage.text.split(".").pop()
-                            ]
-                          }
-                          style={{
-                            width: 100,
-                            height: 80,
-                            resizeMode: "cover",
-                            alignSelf: "center",
-                            margin: 10,
-                          }}
-                        />
-                        <TouchableOpacity
-                          style={{
-                            width: 100,
-                            height: 50,
-                            alignSelf: "center",
-                            margin: 10,
-                          }}
-                          onPress={() =>
-                            Linking.openURL(props.currentMessage.text)
-                          }
-                        >
-                          <Text style={{ color: "black" }}>
-                            {props.currentMessage.text}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    )
                   : null
           }
         />
@@ -488,6 +488,7 @@ const GroupScreen = ({ navigation, route }) => {
           </Send>
         )}
         renderActions={renderActions}
+        renderUsernameOnMessage 
         scrollToBottom
         scrollToBottomComponent={() => (
           <FontAwesome
